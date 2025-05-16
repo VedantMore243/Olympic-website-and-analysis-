@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Olympic Poll</title>
+  <style>
+    /* CSS styles (same as provided in the previous response) */
+  </style>
+</head>
+<body>
+  <div id="poll">
+    <h3>Poll Question:</h3>
+    <ul id="options">
+      <li>
+        <label>
+          <input type="radio" name="vote" value="option1"> Option 1
+        </label>
+        <span class="votes">0</span>
+      </li>
+      <li>
+        <label>
+          <input type="radio" name="vote" value="option2"> Option 2
+        </label>
+        <span class="votes">0</span>
+      </li>
+      <!-- Add more options here as needed -->
+    </ul>
+    <button id="submitBtn">Submit Vote</button>
+    <p id="voteMessage"></p>
+    <div id="pollResults">
+      <!-- Poll results will be displayed here -->
+    </div>
+  </div>
+
+  <script>
+    function getRandomVoteCounts(optionsCount) {
+      const votesData = {};
+      for (let i = 1; i <= optionsCount; i++) {
+        const randomCount = Math.floor(Math.random() * 100); // Random initial vote count up to 100
+        votesData[`option${i}`] = randomCount;
+      }
+      return votesData;
+    }
+
+    function submitVote(vote) {
+      if (localStorage.getItem('voted') === 'true') {
+        alert('You have already voted.');
+        return;
+      }
+
+      const votesData = JSON.parse(localStorage.getItem('votes')) || getRandomVoteCounts(2);
+      votesData[vote]++;
+      localStorage.setItem('votes', JSON.stringify(votesData));
+      localStorage.setItem('voted', 'true');
+
+      const voteMessage = document.getElementById('voteMessage');
+      voteMessage.textContent = 'Vote submitted successfully!';
+      voteMessage.style.color = 'green';
+
+      document.getElementById('submitBtn').disabled = true;
+
+      displayPollResults();
+    }
+
+    function displayPollResults() {
+      const votesData = JSON.parse(localStorage.getItem('votes')) || getRandomVoteCounts(2);
+      const pollResultsDiv = document.getElementById('pollResults');
+      pollResultsDiv.innerHTML = '';
+
+      const optionsList = document.getElementById('options');
+      const options = optionsList.getElementsByTagName('li');
+
+      Object.keys(votesData).forEach((option, index) => {
+        const votesCount = votesData[option];
+        const optionResult = document.createElement('p');
+        optionResult.textContent = `${options[index].textContent.trim()}: ${votesCount} votes`;
+        pollResultsDiv.appendChild(optionResult);
+
+        options[index].querySelector('.votes').textContent = votesCount;
+      });
+    }
+
+    // Call the displayPollResults function initially to show vote counts
+    displayPollResults();
+
+    document.getElementById('submitBtn').addEventListener('click', function() {
+      const selectedOption = document.querySelector('input[name="vote"]:checked');
+      if (!selectedOption) {
+        alert('Please select an option.');
+        return;
+      }
+
+      const voteValue = selectedOption.value;
+      submitVote(voteValue);
+    });
+
+    window.addEventListener('load', function() {
+      if (localStorage.getItem('voted') === 'true') {
+        document.getElementById('submitBtn').disabled = true;
+        document.getElementById('voteMessage').textContent = 'You have already voted.';
+        document.getElementById('voteMessage').style.color = 'red';
+      }
+    });
+  </script>
+</body>
+</html>
